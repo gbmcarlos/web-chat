@@ -31,7 +31,7 @@ echo ">>>> Removing old container"
 docker rm -f web-chat || true
 
 echo ">>>> Running new container"
-docker run --name web-chat -d -p $HOST_PORT:$CONTAINER_PORT -v $PWD/../www:/var/www/www web-chat:latest
+docker run --name web-chat -e SQLITEDB_FILE=/var/www/html/phpsqlte.db -d -p $HOST_PORT:$CONTAINER_PORT -v $PWD/../www:/var/www/www web-chat:latest
 
 echo ">>>> Tailing logs"
 docker logs -f web-chat
