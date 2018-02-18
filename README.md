@@ -1,49 +1,97 @@
-## What's this?
-This skeleton allows to have a working Silex application running inside a docker container completely out of the box, and configurable through environment variables.
+# Bunq Back End Engineer assignment
+[chat.gbmcarlos.com](http://chat.gbmcarlos.com)
 
-## Features 
-* Run as a [Docker](https://docs.docker.com/) container: only one dependency, Docker. It can be deployed in any decent modern server. It can be deployed in a matter of minutes
-* Apache with configurable ports: Both the external and the internal ports are configurable. This allows to have Apache bind ports other than 80 and 443, in case the container will run as a non-root user (as some third-party Docker build services do) 
-* [Silex](https://silex.symfony.com/doc/2.0/) application: backed and endorsed by [Symfony and its components](https://symfony.com/components), nothing else to say.
-* Service and routing registrars: register services (and controllers) and routes easily
-* Packed with [Bootstrap](https://getbootstrap.com/docs/4.0/getting-started/introduction/) and [jQuery](http://api.jquery.com/): included from CDNs in the [Twig](https://twig.symfony.com/doc/2.x/) layout
-* `up.sh` included: get the application running in your local with the simple command `./deploy/up.sh`
-* Lots of environment variables to configure
+## Installation
 
-## How to use it
-* This skeleton is available as a [composer package in packagist.org](https://packagist.org/packages/gbmcarlos/docker-silex-skeleton), so you only need to run `composer create-project gbmcarlos/docker-silex-skeleton [folder-name]` with the name of the folder where you want to create the project
-* After that, just `cd` into the project folder and start a new repository with `git init` and add your remote with `git remote add origin https://github.com/{you}/{your-project}.git`
-* Start working
+Install dependencies with `composer install`.
+
+Build the Docker image (first time) with `docker build -t chat_app:latest [project's root directory]`.
+
+Run the Docker container with `docker run --name chat_app -e APP_ENV=[env] -e SQLITEDB_FILE=[db_file] -e APP_DEBUG=[debug] -d -p [port]:80 -v [project's root directory]/www:/var/www/html chat_app:latest`.
+
+*Note: PHP will need premissions to access the file specified in `SQLITEDB_FILE`
+
+and visit `http://[docker ip]:[port]/` for testing the application.
+
+OR
+
+run `./deploy/up.sh`. This will build and run the application locally, with debug on port 80 and tail the logs
+
+## Assignment
+*Write a very simple 'chat' application backend in PHP. A user should be able to send a simple text
+message to another user and a user should be able to get the messages sent to him and the
+author users of those messages. The users and messages should be stored in a simple SQLite
+database. All communication between the client and server should happen over a simple JSON
+based protocol over HTTP (which may be periodically refreshed to poll for new messages). A GUI,
+user registration and user login are not needed but the users should be identified by some token
+or ID in the HTTP messages and the database. You have the freedom to use any framework and
+libraries; keep in mind though that we love custom-build.*
 
 ## Requirements
-* Docker 
-* To run it locally you wll need php 7.1 and composer, as the dependencies are installed outside the docker container using composer ([here](https://getcomposer.org/download/)'s how to get composer)
 
-## Environment variables available
+### User journey
 
-|       ENV VAR      | Default value | Description |
-| ------------------ | ------------- | ----------- |
-| HOST_PORT          | 80            | The port Docker will use as the host port in the network bridge. This is the external port, the one your app will be called through |
-| CONTAINER_PORT     | 80            | The port that Apache will listen to from inside the container. If `APACHE_USER` is a non-root user, this can not be under 1024, [here](https://www.w3.org/Daemon/User/Installation/PrivilegedPorts.html)'s why  |
-| APACHE_USER        | root          | This is the user the Docker container will be run as, and therefore the user Apache will be run as. |
-| HOST_NAME          | app.com       | The host name passed to Apache in the virtual host. |
-| APP_ENV            | prod          | Environment variable available inside the Docker container, useful for the application. |
-| APP_DEBUG          | false         | Environment variable available inside the Docker container, useful for the application. |
-| XDEBUG_ENABLE      | off           | (`off`\|`on`) This options enables and disables Xdebug. |
-| XDEBUG_IDEKEY      | idekey        | Specify the IDE Key for Xdebug. |
-| XDEBUG_REMOTE_PORT | 9000          | Specify the remote port for Xdebug. |
-| XDEBUG_REMOTE_HOST | localhost     | Specify the remote host for Xdebug |
+#### Login page
 
-Example:
-`CONTAINER_PORT=8000 APACHE_USER=www-data XDEBUG_ENABLE=on ./deploy/up.sh`
+In this page the user will have a text box to input the username and a submit button.
+The username can be an alphanumeric string. 
 
-## Built-in Stack
-* [Debian jessie](https://hub.docker.com/r/_/debian/)
-* Apache 2
-* [PHP 7.1.11](https://hub.docker.com/_/php/)
-* Xdebug 2.5.5
-* Silex 2.2.0
-* PHPUnit 6.4
-* Twig 2.4.4
-* jQuery 3.2.1
-* 4.0.0-beta.2
+* When the submit is clicked, the user will be redirected to the dashboard page.
+* If a user with that username does not exists, it will be created.
+
+#### Dashboard page
+
+In this page the user will be shown a list of users he has had messages with (existing chats), and a text box and a button to start a new chat.
+
+* When one of the existing chats is clicked, the user will be redirected to the chat page with that other user.
+* When the new chat button is clicked, if the textbox contains a valid username, the user will be redirected to a blank chat page.
+
+#### Chat page
+
+In this page the user will see the username of the other user, and all the messages sent and received in that chat, with the time they were sent and received; and a text area and a button to send a new message.
+
+* When the new message button is clicked, the new message will be sent and it will appear in the list of messages.
+
+* The list of messages will be automatically refreshed every minute.
+
+### Tech stack
+
+* Apache server
+* PHP
+* Silex framework
+* SQLite database
+* Docker container
+
+## Tech actions
+
+* Project set up
+    * Docker container with Apache and PHP
+    * Silex application as a docker volume
+* Define database schema
+    * User table: ID (unique key, aut-increment, not null), username (unique, not null), createdAt (dateTime, not null)
+    * Chat table: ID (unique key, aut-increment, not null), user1Id (foreign key), user2Id (foreign key), createdAt (dateTime not null)
+        * a user can have many chats (one-to-many), but a chat always have 2 users (one-to-two?)(we are not doing group chats)
+    * Message table: ID (unique key, aut-increment, not null), chatId (foreign key), text (string, not null), createdAt (dateTime not null)
+* Implement endpoints to:
+    * Check if user exists by username
+    * Create new user with username
+    * Retrieve list of existing chats for a user, each with the last message
+    * Retrieve list of messages for a chat
+    * Retrieve list of messages for a chat since last messages
+    * Send new message
+* Implement templates
+    * Login: form with text box and submit button
+    * Dashboard: list iterating through the chats, form with text box and submit button
+    * Chat: List of messages, send and received differentiated by a class, each with the text and the time, text area and submit button 
+* Implement front-end logic:
+    * Before submitting the login form, check that the username is a valid string
+    * Before submitting the new chat form, AJAX call to check if the user exists (nice to have; also in the backend)
+    * AJAX call to send the new message
+    * Automatic update of messages
+    
+*Note on urls: Since there will not be authentication nor authorzation, the applicatioon will not keep a user session. Therefore, the URLs will follow a RESTful approach:*
+
+* /login (login page)
+* /{username}/dashboard (dashboard page for a specific user)
+* /{username}/chat/{chatId} (chat page for a specific chat of a specific user)
+    
