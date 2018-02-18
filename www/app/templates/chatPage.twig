@@ -1,0 +1,81 @@
+{% extends "layout.twig" %}
+
+{% block title %}Chat with {{ username2 }}{% endblock %}
+
+{% block content %}
+
+    <div class="row">
+        <div class="col-md-8 col-md-offset-2">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Chat with <b>{{ username2 }}</b></h3>
+                </div>
+                <div class="panel-body">
+
+                    <div id="messageList">
+                        {% if messages %}
+
+                            {% for message in messages %}
+
+                                {% if message.sent %}
+                                    <div class="well well-sm text-right" style="background-color: rgb(220, 248, 198);" data-id="{{ message.id }}">
+                                        {{ message.text }}
+                                        <br>
+                                        <small>{{ message.createdAt | date("j/n/Y G:i") }}</small>
+                                    </div>
+                                {% else %}
+                                    <div class="well well-sm" style="background-color: white;" data-id="{{ message.id }}">
+                                        {{ message.text }}
+                                        <br>
+                                        <small>{{ message.createdAt | date("j/n/Y G:i") }}</small>
+                                    </div>
+                                {% endif %}
+
+                            {% endfor %}
+
+                        {% else %}
+                            <div class="well">
+                                There are no messages in this chat yet.
+                            </div>
+                        {% endif %}
+                    </div>
+
+                </div>
+                <div class="panel-footer">
+                    <div class="container-fluid">
+
+                        <div class="col-md-10">
+                            <input type="text" class="form-control" id="messageInput">
+                        </div>
+                        <div class="col-md-2">
+                            <span class="glyphicon glyphicon-refresh hidden" aria-hidden="true" id="loadingIcon"></span>
+                            <input type="button" class="btn btn-default" id="submitButton" value="Send" data-username1="{{ username1 }}" data-username2="{{ username2 }}" data-userid={{ userId }}>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="template" id="sentMessageTemplate">
+        <div class="well well-sm text-right" style="background-color: rgb(220, 248, 198);" data-id="{id}" data-async="{async}">
+            {text}
+            <br>
+            <small>{createdAt}</small>
+        </div>
+    </script>
+
+    <script type="template" id="receivedMessageTemplate">
+        <div class="well well-sm" style="background-color: white;" data-id="{id}">
+            {text}
+            <br>
+            <small>{createdAt}</small>
+        </div>
+    </script>
+
+{% endblock %}
+
+{% block footerAssets %}
+    <script type="application/javascript" src="{{ asset('assets/js/chatPage.js') }}"></script>
+    <link rel="stylesheet" type="text/css" href="{{ asset('assets/css/chatPage.css') }}">
+{% endblock %}

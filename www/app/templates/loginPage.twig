@@ -1,0 +1,26 @@
+{% extends "layout.twig" %}
+
+{% block title %}Login{% endblock %}
+
+{% block content %}
+
+    <div class="col-md-6 col-md-offset-3">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title">Login</h3>
+            </div>
+            <div class="panel-body">
+                <div class="form-group">
+                    <label for="usernameInput">Choose a username, new or existing:</label>
+                    <input type="text" class="form-control" id="usernameInput">
+                </div>
+                <input type="button" class="btn btn-default" id="loginSubmitButton" value="Login">
+            </div>
+        </div>
+    </div>
+
+{% endblock %}
+
+{% block footerAssets %}
+    <script type="application/javascript" src="{{ asset('assets/js/loginPage.js') }}"></script>
+{% endblock %}
