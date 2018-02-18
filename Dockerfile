@@ -6,7 +6,7 @@ FROM php:7.1-apache
 RUN    apt-get update \
     && apt-get -yq install \
         curl \
-        php7.0-curl \
+        curl \
         libapache2-mod-macro \
         git \
         zip \
